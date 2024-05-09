@@ -19,12 +19,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({error: "User does not exists"}, {status: 404})
         }
 
-        console.log("user does exists");
+        // console.log("user does exists");
     
+        // const salt = await bcrypt.genSalt(10);
+        // const hashedPassword = await bcrypt.hash(password, salt)
         const validPassword = await bcrypt.compare(password, user.password)
 
+        console.log("password",password, "user.password", user.password);
+        
         if (!validPassword) {
-            return NextResponse.json({error: "Check your credentials"}, {status: 304})
+            console.log("Check your credentials");
+            
+            return NextResponse.json({error: "Check your credentials"}, {status: 400})
         }
 
         const tokenData = {
@@ -44,9 +50,13 @@ export async function POST(request: NextRequest) {
             httpOnly: true
         })
 
+        console.log(response);
+        
         return response
 
     } catch (error: any) {
+        console.log(error);
+        
         return NextResponse.json({error: error.message}, {status: 500})
     }
 }
