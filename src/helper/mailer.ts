@@ -5,15 +5,24 @@ import bcrypt from 'bcryptjs'
 export const sendEmail = async({email, emailType, userId}: any) => {
     try {
         const hashedToken = await bcrypt.hash(userId.toString(), 10)
-        // todo: configure mail for usage
+        // console.log(email, emailType, userId);
+        
+
         if (emailType === "VERIFY") {
-            await User.findByIdAndUpdate(userId, 
-                {verifyToken: hashedToken, verfiyTokenExpiry: Date.now() + 3600000}
-            )
+            const updatedUser = await User.findByIdAndUpdate(userId, {
+                $set:{
+                    verifyToken: hashedToken, verifyTokenExpiry: new Date(Date.now() + 3600000)
+                }
+            });
+
+            console.log("updatedUser :", updatedUser);
+            
         } else if (emailType === "RESET") {
-            await User.findByIdAndUpdate(userId, 
-                {forgotPasswordToken: hashedToken, forgotPasswordTokenExpiry: Date.now() + 3600000}
-            )
+            await User.findByIdAndUpdate(userId, { 
+                $set : {
+                    forgotPasswordToken: hashedToken, forgotPasswordTokenExpiry: new Date(Date.now() + 3600000)
+                }
+            })
         }
         
         const transport = nodemailer.createTransport({
@@ -30,14 +39,14 @@ export const sendEmail = async({email, emailType, userId}: any) => {
         <a href="${process.env.DOMAIN}/verfiyemail?token=${hashedToken}">here </a> 
         to ${emailType === "VERIFY" ? "verify your email" : "Reset your password"} or copy and paste the link below in your browser.
         <br>
-        ${process.env.DOMAIN}/verfiyemail?token=${hashedToken}
+        ${process.env.DOMAIN}/verifyemail?token=${hashedToken}
         </p>`;
 
         const resetHTML = 
         `<p>Click 
         <a href="${process.env.DOMAIN}/verfiyemail?token=${hashedToken}">here</a> to ${emailType === "VERIFY" ? "verify your email" : "Reset your password"} or copy and paste the link below in your browser.
         <br>
-        ${process.env.DOMAIN}/verfiyemail?token=${hashedToken}
+        ${process.env.DOMAIN}/verifyemail?token=${hashedToken}
         </p>`;
 
         const mailOptions = {
@@ -48,7 +57,7 @@ export const sendEmail = async({email, emailType, userId}: any) => {
         }
 
         const mailResponse = await transport.sendMail(mailOptions)
-        return mailOptions
+        return mailResponse
 
     } catch (error: any) {
         throw new Error(error.message)
