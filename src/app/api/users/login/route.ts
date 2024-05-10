@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
         // const hashedPassword = await bcrypt.hash(password, salt)
         const validPassword = await bcrypt.compare(password, user.password)
 
-        console.log("password",password, "user.password", user.password);
+        // console.log("password",password, "user.password", user.password);
         
         if (!validPassword) {
             console.log("Check your credentials");
@@ -50,7 +50,7 @@ export async function POST(request: NextRequest) {
             httpOnly: true
         })
 
-        console.log(response);
+        // console.log(response);
         
         return response
 
